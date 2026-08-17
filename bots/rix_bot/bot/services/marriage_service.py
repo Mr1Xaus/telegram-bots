@@ -58,13 +58,14 @@ class MarriageService:
         cd_seconds = cls.COOLDOWNS.get(action, 3600)
         key = f"marriage_interaction:{action}:{user_id}:{partner_id}"
         
-        ttl = await redis.ttl(key)
-        if ttl > 0:
-            hours = ttl // 3600
-            minutes = (ttl % 3600) // 60
-            return False, f"⏳ Кулдаун еще не прошел! Попробуйте через {hours} ч {minutes} мин."
+        if redis is not None:
+            ttl = await redis.ttl(key)
+            if ttl > 0:
+                hours = ttl // 3600
+                minutes = (ttl % 3600) // 60
+                return False, f"⏳ Кулдаун еще не прошел! Попробуйте через {hours} ч {minutes} мин."
 
-        await redis.setex(key, cd_seconds, int(time.time()))
+            await redis.setex(key, cd_seconds, int(time.time()))
         
         messages = {
             "kiss": "😘 Вы страстно поцеловали своего партнера!",

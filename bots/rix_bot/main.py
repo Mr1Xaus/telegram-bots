@@ -33,9 +33,17 @@ async def main():
         await conn.run_sync(Base.metadata.create_all)
     logging.info("Database tables verified/created.")
 
-    # Initialize Redis & FSM Storage
-    redis = Redis.from_url(settings.redis_url)
-    storage = RedisStorage(redis=redis)
+    # Initialize Redis or Fallback to MemoryStorage
+    try:
+        redis = Redis.from_url(settings.redis_url)
+        await redis.ping()
+        storage = RedisStorage(redis=redis)
+        logging.info("Connected to Redis server.")
+    except Exception:
+        logging.warning("Redis server is not running locally. Using MemoryStorage for FSM & state caching.")
+        from aiogram.fsm.storage.memory import MemoryStorage
+        storage = MemoryStorage()
+        redis = None
 
     # Initialize Bot & Dispatcher
     bot = Bot(token=settings.bot_token)
@@ -43,8 +51,9 @@ async def main():
 
     # Register Middlewares
     dp.update.outer_middleware(UserChatSyncMiddleware())
-    dp.message.middleware(AntiSpamMiddleware(redis=redis, limit=5, period=3))
-    dp.chat_member.outer_middleware(AntiRaidMiddleware(redis=redis, window_seconds=180, max_joins=10))
+    if redis:
+        dp.message.middleware(AntiSpamMiddleware(redis=redis, limit=5, period=3))
+        dp.chat_member.outer_middleware(AntiRaidMiddleware(redis=redis, window_seconds=180, max_joins=10))
 
     # Inject Redis into handler data
     dp["redis"] = redis
@@ -86,7 +95,8 @@ async def main():
     finally:
         scheduler.shutdown()
         await bot.session.close()
-        await redis.close()
+        if redis:
+            await redis.close()
         await engine.dispose()
         logging.info("RiX Bot stopped cleanly.")
 

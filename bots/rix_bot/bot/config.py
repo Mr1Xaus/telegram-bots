@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 class Settings(BaseSettings):
     bot_token: str
-    postgres_url: str = "postgresql+asyncpg://rix_user:rix_password@localhost:5432/rix_db"
+    postgres_url: str = "sqlite+aiosqlite:///rix.db"
     redis_url: str = "redis://localhost:6379/0"
     owner_id: int = 0
     log_level: str = "INFO"

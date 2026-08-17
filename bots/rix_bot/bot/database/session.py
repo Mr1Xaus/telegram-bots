@@ -2,12 +2,13 @@ from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from bot.config import settings
 
+engine_kwargs = {"echo": False, "future": True}
+if "sqlite" not in settings.postgres_url:
+    engine_kwargs.update({"pool_size": 10, "max_overflow": 20})
+
 engine = create_async_engine(
     settings.postgres_url,
-    echo=False,
-    future=True,
-    pool_size=10,
-    max_overflow=20,
+    **engine_kwargs
 )
 
 AsyncSessionLocal = async_sessionmaker(

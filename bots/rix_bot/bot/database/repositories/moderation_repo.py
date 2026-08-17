@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from datetime import datetime, timezone
 from sqlalchemy import select, func, and_
 from sqlalchemy.ext.asyncio import AsyncSession
