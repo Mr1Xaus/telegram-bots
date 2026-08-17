@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: rix_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: rix_user
+      POSTGRES_PASSWORD: rix_password
+      POSTGRES_DB: rix_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rix_user -d rix_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: rix_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  bot:
+    build: .
+    container_name: rix_bot_app
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - POSTGRES_URL=postgresql+asyncpg://rix_user:rix_password@postgres:5432/rix_db
+      - REDIS_URL=redis://redis:6379/0
+      - OWNER_ID=${OWNER_ID}
+    env_file:
+      - .env
+
+volumes:
+  postgres_data:
+  redis_data:
