@@ -3,7 +3,7 @@ from aiogram.filters import CommandStart, Command
 from bot.database.session import AsyncSessionLocal
 from bot.database.repositories.user_repo import UserRepo
 from bot.database.models.user import GenderEnum
-from bot.utils.keyboards import get_gender_keyboard
+from bot.utils.keyboards import get_gender_keyboard, get_main_pm_keyboard
 
 router = Router()
 
@@ -31,7 +31,7 @@ async def cmd_profile(message: types.Message):
             f"🔥 Квест-стрик: <b>{user.quest_streak} дней</b>\n"
         )
         
-        reply_markup = get_gender_keyboard() if user.gender == GenderEnum.UNKNOWN else None
+        reply_markup = get_main_pm_keyboard() if message.chat.type == "private" else (get_gender_keyboard() if user.gender == GenderEnum.UNKNOWN else None)
         await message.answer(text, parse_mode="HTML", reply_markup=reply_markup)
 
 @router.callback_query(F.data.startswith("set_gender:"))

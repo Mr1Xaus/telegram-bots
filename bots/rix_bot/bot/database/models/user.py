@@ -29,6 +29,8 @@ class User(Base):
     
     is_guarantor: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     guarantor_mentor_id: Mapped[Optional[int]] = mapped_column(BigInteger, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    guarantor_reviews_url: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    guarantor_guarantees_sum: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
     
     rep_balance: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
     custom_avatar_url: Mapped[Optional[str]] = mapped_column(String, nullable=True)

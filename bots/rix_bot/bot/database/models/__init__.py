@@ -4,6 +4,7 @@ from bot.database.models.clan import Clan, ClanMember
 from bot.database.models.marriage import Marriage
 from bot.database.models.title import Title, UserTitle, MarketListing, TitleTypeEnum
 from bot.database.models.moderation import ModerationLog, ModerationActionEnum
+from bot.database.models.quest import Quest, QuestTypeEnum
 
 __all__ = [
     "Base",
@@ -21,4 +22,6 @@ __all__ = [
     "TitleTypeEnum",
     "ModerationLog",
     "ModerationActionEnum",
+    "Quest",
+    "QuestTypeEnum",
 ]
