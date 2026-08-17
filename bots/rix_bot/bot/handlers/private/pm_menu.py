@@ -61,6 +61,11 @@ async def btn_instruction(message: types.Message):
     )
     await message.answer(text, parse_mode="HTML", reply_markup=get_main_pm_keyboard())
 
+@router.message(F.chat.type == "private", F.text == "🛒 Маркет титулов")
+async def btn_market(message: types.Message):
+    from bot.handlers.private.market import show_market_page
+    await show_market_page(message, page=0)
+
 @router.message(F.chat.type == "private", F.text == "🎲 Крутить титул (100 Rep)")
 async def btn_spin_title(message: types.Message):
     async with AsyncSessionLocal() as session:
@@ -77,9 +82,10 @@ async def btn_quests(message: types.Message):
         quests = await QuestService.get_user_quests(session, message.from_user.id)
         
         text = "🎯 <b>Ваши ежедневные квесты:</b>\n\n"
+        desc_map = {item[0]: item[1] for item in QuestService.DAILY_QUESTS}
         for q in quests:
             status = "✅" if q.is_completed else f"[{q.progress}/{q.target}]"
-            desc = dict(QuestService.DAILY_QUESTS).get(q.quest_key, q.quest_key)
+            desc = desc_map.get(q.quest_key, q.quest_key)
             text += f"• {desc}: <b>{status}</b> (+2.0 Rep)\n"
             
         await message.answer(text, parse_mode="HTML")
