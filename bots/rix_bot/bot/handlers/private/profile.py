@@ -1,5 +1,5 @@
 from aiogram import Router, F, types
-from aiogram.filters import Command
+from aiogram.filters import CommandStart, Command
 from bot.database.session import AsyncSessionLocal
 from bot.database.repositories.user_repo import UserRepo
 from bot.database.models.user import GenderEnum
@@ -7,7 +7,8 @@ from bot.utils.keyboards import get_gender_keyboard
 
 router = Router()
 
-@router.message(Command("profile"))
+@router.message(CommandStart())
+@router.message(Command("start", "profile"))
 async def cmd_profile(message: types.Message):
     async with AsyncSessionLocal() as session:
         user_repo = UserRepo(session)
